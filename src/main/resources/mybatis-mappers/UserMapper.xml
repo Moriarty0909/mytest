@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.dao.UserDao">
+    <update id="updateUser">
+        update User t
+        <set><!--当下面有返回true的时候，才会执行set-->
+            <if test="username != null">
+                username = #{username},
+            </if>
+            <if test="password != null">
+                password = #{password}
+            </if>
+        </set>
+        where t.id = #{id}
+    </update>
+</mapper>

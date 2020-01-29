@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="x-admin-sm" xmlns:th="http://www.thymeleaf.org">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>更新用户信息</title>
+        <header th:replace="header::html"></header>
+    </head>
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form">
+                  <input type="hidden" id="userId" name="id" th:value="${user.id}">
+                  <div class="layui-form-item">
+                      <label for="username" class="layui-form-label">
+                          <span class="x-red">*</span>登录名
+                      </label>
+                      <div class="layui-input-inline">
+                          <input type="text" id="username" name="username" th:value="${user.username}" required="" lay-verify="required"
+                          autocomplete="off" class="layui-input">
+                      </div>
+                      <div class="layui-form-mid layui-word-aux">
+                          <span class="x-red">*</span>将会成为您唯一的登入名
+                      </div>
+                  </div>
+                  <div class="layui-form-item">
+                      <label for="phone" class="layui-form-label">
+                          <span class="x-red">*</span>手机
+                      </label>
+                      <div class="layui-input-inline">
+                          <input type="text" id="phone" name="phone" th:value="${user.telephone}" required="" lay-verify="phone"
+                          autocomplete="off" class="layui-input">
+                      </div>
+                      <div class="layui-form-mid layui-word-aux">
+                          <span class="x-red">*</span>将会成为您唯一的登入名
+                      </div>
+                  </div>
+                  <div class="layui-form-item">
+                      <label for="L_email" class="layui-form-label">
+                          <span class="x-red">*</span>邮箱
+                      </label>
+                      <div class="layui-input-inline">
+                          <input type="text" id="L_email" name="email" th:value="${user.email}"required="" lay-verify="email"
+                          autocomplete="off" class="layui-input">
+                      </div>
+                      <div class="layui-form-mid layui-word-aux">
+                          <span class="x-red">*</span>
+                      </div>
+                  </div>
+                  <div class="layui-form-item">
+                      <label class="layui-form-label"><span class="x-red">*</span>角色</label>
+                      <div class="layui-input-block show-role-container">
+                  </div>
+                  <div class="layui-form-item">
+                      <label for="L_pass" class="layui-form-label">
+                          <span class="x-red">*</span>密码
+                      </label>
+                      <div class="layui-input-inline">
+                          <input type="password" id="L_pass" name="pass" required="" lay-verify="pass"
+                          autocomplete="off" class="layui-input">
+                      </div>
+                      <div class="layui-form-mid layui-word-aux">
+                          6到16个字符
+                      </div>
+                  </div>
+                  <div class="layui-form-item">
+                      <label for="L_repass" class="layui-form-label">
+                          <span class="x-red">*</span>确认密码
+                      </label>
+                      <div class="layui-input-inline">
+                          <input type="password" id="L_repass" name="repass" required="" lay-verify="repass"
+                          autocomplete="off" class="layui-input">
+                      </div>
+                  </div>
+                  <div class="layui-form-item">
+                      <label for="L_repass" class="layui-form-label">
+                      </label>
+                      <button  class="layui-btn" lay-filter="add" lay-submit="">
+                          修改
+                      </button>
+                  </div>
+              </form>
+            </div>
+        </div>
+        <script>layui.use(['form', 'layer'],
+            function() {
+                $ = layui.jquery;
+                var form = layui.form,
+                    layer = layui.layer;
+                laydate = layui.laydate;
+                getAllRole(function () {
+                    layui.form.render('radio')
+                });
+                //日期
+                laydate.render({
+                    elem: '#birthday',
+                    format: 'yyyy-MM-dd'
+                });
+
+                //自定义验证规则
+                form.verify({
+                    nikename: function(value) {
+                        if (value.length < 5) {
+                            return '昵称至少得5个字符啊';
+                        }
+                    },
+                    pass: [/(.+){6,12}$/, '密码必须6到12位'],
+                    repass: function(value) {
+                        if ($('#L_pass').val() != $('#L_repass').val()) {
+                            return '两次密码不一致';
+                        }
+                    }
+                });
+
+                //监听提交
+                form.on('submit(add)',
+                function(data) {
+                    console.log(data);
+                    //发异步，把数据提交给php
+                    layer.alert("增加成功", {
+                        icon: 6
+                    },
+                    function() {1
+                        //关闭当前frame
+                        xadmin.close();
+
+                        // 可以对父窗口进行刷新 
+                        xadmin.father_reload();
+                    });
+                    return false;
+                });
+                function getAllRole(callback) {
+                    $.ajax({
+                        url:"/role/all",
+                        type:"GET",
+                        dataType:"json",
+                        success:function (result) {
+                            var html = "";
+                            if (result.datas && result.datas.length >0) {
+                                for (i in result.datas) {
+                                    html +='<input type="radio" name="roleId" value="'+result.datas[i].id+'" title="'+result.datas[i].name+'">'+
+                                        '<div class="layui-unselect layui-form-radio layui-form-radioed"><i class="layer-anim layui-icon"></i> <div>'+result.datas[i].name+'</div></div>';
+                                }
+                                $(".show-role-container").html(html);
+
+                                getCurrentUserRole(callback);
+                            }
+                        }
+                    });
+                }
+
+                function getCurrentUserRole(callback) {
+                    var userId = $("#userId").val();
+
+                    $.ajax({
+                        url:"/roleuser/getRoleUserByUserId",
+                        type:"POST",
+                        data:{
+                            "userId": userId
+                        },
+                        dataType:"json",
+                        success:function (result) {
+                            if (result.code == 200) {
+                                if (result.data) {
+                                    $("[name=roleId]").each(function () {//名称选择器
+                                        if ($(this).val() == result.data.roleId) {
+                                            $(this).attr("checked","checked");
+                                            return false;
+                                        }
+
+                                    })
+                                }
+                                // if (callback) {
+                                //     callback();
+                                // }
+                                //效果同上
+                                callback && callback();
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+
+    </body>
+
+</html>

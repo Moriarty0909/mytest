@@ -1,0 +1,44 @@
+spring:
+  profiles:
+    active: dev
+  devtools:
+    restart:
+      additional-paths: resources/**,static/**,templates/**
+
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://183.56.219.211:3306/mytest?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: root
+    password: Hi,baby520
+    platform: mysql
+
+    # 连接池指定SpringBoot2.02版本默认使用Hikari，此处替换成Druid
+    type: com.alibaba.druid.pool.DruidDataSource
+    #初始化大小与最大最小
+    initialSize: 1
+    minIdle: 3
+    maxActive: 20
+    #配置获取连接等待超时的时间
+    maxWait: 60000
+    #配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+    timeBetweenEvictionRunsMillis: 60000
+    #配置一个连接在 池中最小生存的时间，单位是毫秒
+    minEvictableIdleTimeMillis: 30000
+    validationQuery: select 'x'
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    #是否缓存preparedStatement，打开PSCache，并且指定每个连接上PSCache的大小。官方建议mysql下建议关闭，如果用sql防火墙，建议打开。
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+
+
+mybatis:
+  type-aliases-package: com.ccssoft.model
+  mapper-location: classpath:/mybatis-mappers/*
+  configuration:
+    mapUnderscoreToCamelCase: true
+
+api: /api
+role: /role
+rootCatalogue :
